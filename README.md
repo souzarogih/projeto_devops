@@ -2,6 +2,12 @@
 
 #### Sistema para empresa de saúde digital
 
+Comando para fazer clone do repositório
+`$ git clone https://github.com/souzarogih/projeto_devops.git`
+
+Entrar no diretório
+`$ cd projeto_devops`
+
 Comando para construir todos os serviço
 `$ docker-compose build`
 

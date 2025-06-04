@@ -1,0 +1,64 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-devops-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 123mudar
+    networks:
+      - projeto_devops
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  backend:
+    image: higorsouza/backend:0.0.3
+    container_name: backend
+    ports:
+      - "8080:8080"
+    depends_on: 
+      mysql:
+        condition: service_healthy
+    environment:
+      - MYSQL_URL=jdbc:mysql://mysql:3306/conexa_backend
+      - MYSQL_USERNAME=appuser
+      - MYSQL_PASSWORD=123mudar
+    networks:
+      - projeto_devops
+
+  frontend:
+    image: higorsouza/web_portal:0.0.5
+    container_name: frontend
+    ports:
+      - "5173:80"  # Vite dev server simula porta 5173, mas no Docker vai pro 80
+    depends_on:
+      - backend
+    networks:
+      - projeto_devops
+
+  mobile:
+    image: higorsouza/mobile:0.0.4
+    container_name: mobile
+    ports:
+      - "19000:19000"     # Porta do Metro Bundler (Expo)
+      - "19001:19001"     # Porta de WebSocket
+      - "19002:19002"     # Porta do painel do Expo
+    networks:
+      - projeto_devops
+    depends_on:
+      - backend
+
+networks:
+  projeto_devops:
+    driver: bridge
+
+volumes:
+  mysql_data:
